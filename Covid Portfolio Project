@@ -1,10 +1,17 @@
+/*
+
+Covid 19 Data Exploration 
+
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+
+*/
+
+
+
 SELECT * FROM CovidDeaths1
 WHERE continent is not null
 ORDER BY 3,4
 
---SELECT *
--- FROM PortfolioProject..CovidVaccinations
---Order by 3,4
 
 --SELECT data that we are going to be using
 
@@ -13,8 +20,8 @@ FROM CovidDeaths1
 ORDER BY 1,2
 
 
--- Looking at total cases vs total deaths
--- Shows likelihood of dying if contract covid in your country
+--Looking at total cases vs total deaths
+--Shows likelihood of dying if contract covid in your country
 
 SELECT Location, date, total_cases, total_deaths, CAST(total_deaths AS DECIMAL(10,2)) / CAST(total_cases AS DECIMAL(10,2))*100 AS DeathPercentage
 FROM PortfolioProject..CovidDeaths1
@@ -22,13 +29,8 @@ WHERE location LIKE '%kenya%'
 ORDER BY 1,2
 
 
--- Looking at total cases vs population
--- shows what percentafe of population got covid
-
-SELECT Location, date, population, total_cases, CAST(total_cases AS DECIMAL(10,2))/ population *100 AS Percentofpopulationinfected
-FROM PortfolioProject..CovidDeaths1
---WHERE location LIKE '%kenya%'
-ORDER BY 1,2
+--Looking at total cases vs population
+--Shows what percentage of population got covid
 
 SELECT Location, date, population, total_cases, CAST(total_cases AS DECIMAL(20,2)) / CAST(population AS DECIMAL(20,2)) * 100 AS Percentofpopulationinfected
 FROM PortfolioProject..CovidDeaths1
@@ -54,8 +56,8 @@ GROUP BY Location
 ORDER BY TotalDeathCount desc
 
 
---LET'S BREAK THINGS DOWN BY CONTINENT
--- Showing Continents with highest death counts
+--Let's Break Things Down By Continent
+--Showing Continents with highest death counts
 
 SELECT continent, MAX(CAST(total_deaths AS INT)) as TotalDeathCount
 FROM PortfolioProject..CovidDeaths1
@@ -65,7 +67,7 @@ GROUP BY continent
 ORDER BY TotalDeathCount desc
 
 
--- Global numbers
+--Global numbers
 
 Select SUM(new_cases) AS total_cases, SUM(new_deaths) AS total_deaths, SUM(CAST(new_deaths AS DECIMAL(10,2))) / SUM(CAST(new_cases AS DECIMAL(10,2)))*100 AS DeathPercentage
 From PortfolioProject..CovidDeaths1
@@ -76,6 +78,7 @@ order by 1,2
 
 
 --LOOKIING AT TOTAL POPULATION VS VACCINATIONS
+--Shows Percentagr of Population That Has Received at Least One Vaccine
 
 SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations 
 , SUM (vac.new_vaccinations) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.date) AS RollingPeopleVaccinated
@@ -87,7 +90,7 @@ WHERE dea.continent is not NULL
 ORDER BY 2,3
 
 
---USE CTE
+--Using CTE to Perform Calculaion on Partition By in Previous Query
 
 WITH PopvsVac (CONTINENT, LOCATION, DATE, POPULATION, new_vaccination, RollingPeopleVaccinated)
 AS
@@ -105,7 +108,7 @@ SELECT *, (CAST(RollingPeopleVaccinated AS DECIMAL (20,2))) / CAST(population AS
 FROM PopvsVac
 
 
---TEMP TABLE
+--Using TEMP TABLE To Perform Calculaion on Partition By in Previous Query
 
 CREATE TABLE #PercentPopulationVaccinated
 (
@@ -132,7 +135,7 @@ SELECT *, (CAST(RollingPeopleVaccinated AS DECIMAL (20,2))) / CAST(population AS
 FROM #PercentPopulationVaccinated
 
 
--- CREATING VIEW TO STORE DATA FOR LATER VISUALISATIONS 
+-- Creating View To Store Data For Later Visualisations 
 
 CREATE VIEW PercentPopulationVaccinated AS
 SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations 
@@ -145,5 +148,3 @@ WHERE dea.continent is not NULL
 --ORDER BY 2,3
 
 
-SELECT * 
-FROM PercentPopulationVaccinated
